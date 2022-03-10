@@ -3,6 +3,9 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Item\CreateRequestItem;
+use App\Http\Requests\Item\UpdateRequestItem;
+use App\Http\Resources\Item\ItemResource;
 use App\Models\Item;
 use Illuminate\Http\Request;
 
@@ -20,17 +23,7 @@ class ItemController extends BaseController
     public function index()
     {
         $data = $this->item->with('stock')->get();
-        return $this->sendResponse($data, 'Data');
-    }
-
-    /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function create()
-    {
-        //
+        return $this->sendResponseData(ItemResource::collection($data) , 'Data');
     }
 
     /**
@@ -39,9 +32,10 @@ class ItemController extends BaseController
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request)
+    public function store(CreateRequestItem $request)
     {
-        //
+        $item = $this->item->create($request->toArray());
+        return $this->sendResponseData($item, 'Item created successfully.');
     }
 
     /**
@@ -52,18 +46,8 @@ class ItemController extends BaseController
      */
     public function show($id)
     {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function edit($id)
-    {
-        //
+        $data = $this->item->with('stock')->where('id', $id)->first();
+        return $this->sendResponseData(ItemResource::make($data) , 'Data');
     }
 
     /**
@@ -73,9 +57,11 @@ class ItemController extends BaseController
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id)
+    public function update(UpdateRequestItem $request, $id)
     {
-        //
+        $model = $this->item->find($id);
+        $model->update($request->toArray());
+        return $this->sendResponse("Success Update Data");
     }
 
     /**
@@ -86,6 +72,8 @@ class ItemController extends BaseController
      */
     public function destroy($id)
     {
-        //
+        $model = $this->item->find($id);
+        $model->delete();
+        return $this->sendResponse("Berhasil Menghapus");
     }
 }
